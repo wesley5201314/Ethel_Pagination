@@ -1,0 +1,25 @@
+@charset "UTF-8";
+.query-panel-row .form-control {
+    width: 140px;
+    display: inline-block;
+}
+
+.query-panel-row .querySelectStyle {
+    width: 140px !important;
+}
+
+.query-panel-row > label {
+    width: 100px;
+    text-align: right;
+}
+
+.query-panel-row > label:first-child {
+    margin: 0;
+}
+
+.detail-module .module-content > li > .item-content {
+    width: 450px;
+}
+.edit-module .module-content > li > .item-content {
+    width: 450px;
+}
