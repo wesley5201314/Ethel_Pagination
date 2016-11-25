@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/jdbc
+    http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+    http://www.springframework.org/schema/cache
+    http://www.springframework.org/schema/cache/spring-cache.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<!-- 数据源 -->
+	<bean id="DataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<!-- 基本属性 url、user、password -->
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="maxActive" value="${jdbc.maxActive}" />
+		<property name="initialSize" value="${jdbc.initialSize}" />
+		<property name="minIdle" value="${jdbc.minIdle}" />
+		<!-- maxWait 获取连接等待超时的时间 -->
+		<property name="maxWait" value="60000" />
+		<!-- timeBetweenEvictionRunsMillis间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		<!-- minEvictableIdleTimeMillis 一个连接在池中最小空闲的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		<property name="validationQuery" value="SELECT 'z'" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<property name="filters" value="stat" />
+	</bean>
+
+	<!-- mybatis配置 -->
+	<!-- mybatis文件配置，扫描所有mapper文件 -->
+	<bean id="sqlSessionFactoryNum" class="org.mybatis.spring.SqlSessionFactoryBean"
+		p:dataSource-ref="DataSource" p:configLocation="classpath:mybatis/mybatis-config.xml"
+		p:mapperLocations="classpath*:com/ethel/pagination/demo/mapper/*.xml" />
+
+	
+	<!-- mybatisDAO配置 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	  	<property name="basePackage" value="com.ethel.pagination.demo.dao" />
+	</bean>
+
+	
+
+	<!-- ================================事务相关控制================================================= -->
+	<bean name="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="DataSource"></property>
+	</bean>
+
+	<!-- 自动事务 -->
+	<tx:advice id="TxAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!-- 对insert,update,delete,register 开头的方法进行事务管理,只要有异常就回滚 -->
+			<tx:method name="create*" propagation="REQUIRED"
+				rollback-for="java.lang.Throwable" />
+			<tx:method name="register*" propagation="REQUIRED"
+				rollback-for="java.lang.Throwable" />
+			<tx:method name="update*" propagation="REQUIRED"
+				rollback-for="java.lang.Throwable" />
+			<tx:method name="delete*" propagation="REQUIRED"
+				rollback-for="java.lang.Throwable" />
+			<tx:method name="insert*" propagation="REQUIRED"
+				rollback-for="java.lang.Throwable" />
+			<tx:method name="add*" propagation="REQUIRED" rollback-for="java.lang.Throwable" />
+			<tx:method name="modify*" propagation="REQUIRED"
+				rollback-for="java.lang.Throwable" />
+			<tx:method name="save*" propagation="REQUIRED"
+				rollback-for="java.lang.Throwable" />
+			<tx:method name="cancel*" propagation="REQUIRED"
+				rollback-for="java.lang.Throwable" />
+			<!-- 对其他方法 使用默认的事务管理 -->
+			<tx:method name="*" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 事务 aop 配置 -->
+	<aop:config>
+
+		<!-- 定义切入点 -->
+		<aop:pointcut id="pc"
+			expression="(execution(* com.ethel.pagination.demo.service..*(..))))" />  <!-- 事物控制在hsf业务服务接口层 -->
+
+		<aop:advisor pointcut-ref="pc" advice-ref="TxAdvice" />
+
+		<aop:aspect id="exceptionAspect" ref="ExceptionAdvice">
+			<!-- 环绕增强 在该方法中捕获业务的所有异常，设置回滚，并返回结果码 -->
+			 <aop:around method="throwAopTreat" pointcut-ref="pc" />
+		</aop:aspect>
+	</aop:config>
+
+	<!-- 自定义的事务异常处理类 -->
+	<bean id="ExceptionAdvice" class="com.ethel.pagination.demo.aop.ExceptionAdvisor">
+	</bean>
+
+	<!-- 启用对事务注解的支持 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+</beans>

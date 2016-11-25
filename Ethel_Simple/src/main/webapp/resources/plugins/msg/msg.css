@@ -1,0 +1,40 @@
+@charset "utf-8";
+.msg {
+    min-width: 200px;
+    height: 50px;
+    padding: 0 10px;
+    border: 1px solid #E0E0E0;
+    -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
+    background: #ffffff;
+    line-height: 50px;
+    text-align: center;
+    display: none;
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    z-index: 2000;
+    cursor: pointer;
+}
+
+.msg > span {
+    font-size: 12px;
+}
+
+.msg > span:before {
+    margin-right: 10px;
+    font-size: 24px;
+    vertical-align: -4px;
+}
+
+.msg > span.msg-success:before {
+    font-family: FontAwesome;
+    content: "\f058";
+    color: #8CD232;
+}
+
+.msg > span.msg-fail:before {
+    font-family: FontAwesome;
+    content: "\f057";
+    color: #D7000F;
+}
