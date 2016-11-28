@@ -14,11 +14,11 @@ public class PostgreDialect extends Dialect {
 
     @Override
     public String getLimitString(String sql, int offset, int limit) {
-        return PostgrePageHepler.getLimitString(sql, offset, limit);
+        return PostgrePageHelper.getLimitString(sql, offset, limit);
     }
 
     @Override
     public String getCountString(String sql) {
-        return PostgrePageHepler.getCountString(sql);
+        return PostgrePageHelper.getCountString(sql);
     }
 }

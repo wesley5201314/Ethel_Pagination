@@ -1,4 +1,4 @@
-package com.ethel.pagination.dialect;
+package com.ethel.pagination.helper;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,37 +6,19 @@ import java.util.regex.Pattern;
 /**
  * 
  * <br>
- * 描述: MySQL数据库方言 分页<br>
+ * 描述: 抽象Helper类<br>
  * 公司: www.tydic.com<br>
  * @autho wesley
- * @time 2016年11月24日 上午11:10:20
+ * @time 2016年11月28日 下午6:25:52
  */
-public class MySql5PageHepler {
-    /**
-     * 得到查询总数的sql
-     */
-    public static String getCountString(String querySelect) {
+public abstract class AbstractHelper {
 
-        querySelect = getLineSql(querySelect);
-        int orderIndex = getLastOrderInsertPoint(querySelect);
-
-        int formIndex = getAfterFormInsertPoint(querySelect);
-        String select = querySelect.substring(0, formIndex);
-
-        // 如果SELECT 中包含 DISTINCT 只能在外层包含COUNT
-        if (select.toLowerCase().indexOf("select distinct") != -1 || querySelect.toLowerCase().indexOf("group by") != -1) {
-            return new StringBuffer(querySelect.length()).append("select count(1) count from (").append(querySelect.substring(0, orderIndex)).append(" ) t").toString();
-        } else {
-            return new StringBuffer(querySelect.length()).append("select count(1) count ").append(querySelect.substring(formIndex, orderIndex)).toString();
-        }
-    }
-
-    /**
+	 /**
      * 得到最后一个Order By的插入点位置
      * 
      * @return 返回最后一个Order By插入点的位置
      */
-    private static int getLastOrderInsertPoint(String querySelect) {
+    public static int getLastOrderInsertPoint(String querySelect) {
         int orderIndex = querySelect.toLowerCase().lastIndexOf("order by");
         if (orderIndex == -1) {
             orderIndex = querySelect.length();
@@ -46,25 +28,7 @@ public class MySql5PageHepler {
         }
         return orderIndex;
     }
-
-    /**
-     * 得到分页的SQL
-     * 
-     * @param offset
-     *            偏移量
-     * @param limit
-     *            位置
-     * @return 分页SQL
-     */
-    public static String getLimitString(String querySelect, int offset, int limit) {
-
-        querySelect = getLineSql(querySelect);
-
-        String sql = querySelect + " limit " + offset + " ," + limit;
-
-        return sql;
-
-    }
+    
 
     /**
      * 将SQL语句变成一条语句，并且每个单词的间隔都是1个空格
@@ -73,14 +37,14 @@ public class MySql5PageHepler {
      *            SQL语句
      * @return 如果sql是NULL返回空，否则返回转化后的SQL
      */
-    private static String getLineSql(String sql) {
+    public static String getLineSql(String sql) {
         return sql.replaceAll("[\r\n]", " ").replaceAll("\\s{2,}", " ");
     }
 
     /**
      * 得到SQL第一个正确的FROM的的插入点
      */
-    private static int getAfterFormInsertPoint(String querySelect) {
+    public static int getAfterFormInsertPoint(String querySelect) {
         String regex = "\\s+FROM\\s+";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(querySelect);
@@ -101,7 +65,7 @@ public class MySql5PageHepler {
      *            要判断的文本
      * @return 如果匹配返回TRUE,否则返回FALSE
      */
-    private static boolean isBracketCanPartnership(String text) {
+    public static boolean isBracketCanPartnership(String text) {
         if (text == null || (getIndexOfCount(text, '(') != getIndexOfCount(text, ')'))) {
             return false;
         }
@@ -116,7 +80,7 @@ public class MySql5PageHepler {
      * @param ch
      *            字符
      */
-    private static int getIndexOfCount(String text, char ch) {
+    public static int getIndexOfCount(String text, char ch) {
         int count = 0;
         for (int i = 0; i < text.length(); i++) {
             count = (text.charAt(i) == ch) ? count + 1 : count;
