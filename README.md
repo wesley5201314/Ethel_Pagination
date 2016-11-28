@@ -1,7 +1,7 @@
 # Ethel_Pagination
 
 # 简介 #
-	Ethel是一款基于mybatis的分页插件，支持多种数据库，简单配置就可以使用。
+	Ethel是一款基于mybatis的分页插件，支持多种数据库，简单配置就可以使用。前后端可以完全分离，传递需要的参数到后台就可以，通过json与前端交互。
 
 - github：[https://github.com/wesley5201314/Ethel_Pagination](https://github.com/wesley5201314/Ethel_Pagination)
 - gitOSC:[http://git.oschina.net/zhengweishan/Ethel_Pagination](http://git.oschina.net/zhengweishan/Ethel_Pagination)
@@ -107,7 +107,7 @@ mybatis-config.xml添加如下代码：
 			if(null == pageIndex){
 			pageIndex = 1; //默认从第一页开始查
 		}
-			pageIndex = pageIndex + 1; //dataTable插件默认传递的是第一页，需要加1
+			pageIndex = pageIndex + 1; //dataTable插件默认传递的是pageIndex是0，需要加1，我前端用的datatable
 		if(null == pageSize){
 			pageSize = 10; //一页10条数据
 		}
