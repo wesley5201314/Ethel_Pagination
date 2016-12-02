@@ -13,7 +13,9 @@ import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Plugin;
 import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.ReflectorFactory;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
@@ -34,21 +36,35 @@ import com.ethel.pagination.dialect.DialectFactory;
  * @autho wesley
  * @time 2016年11月24日 上午11:22:24
  */
-@Intercepts({ @Signature(type = StatementHandler.class, method = "prepare", args = { Connection.class }) })
+/**
+ * <br>
+ * 标题: <br>
+ * 描述: <br>
+ * 公司: www.tydic.com<br>
+ * @autho wesley
+ * @time 2016年12月2日 下午2:50:44
+*/
+//In 3.4.0, StatementHandler#prepare(Connection) has been changed to StatementHandler#prepare(Connection,Integer).
+//Out 3.4.0 @Intercepts({ @Signature(type = StatementHandler.class, method = "prepare", args = { Connection.class}) })
+@Intercepts({ @Signature(type = StatementHandler.class, method = "prepare", args = { Connection.class,Integer.class }) })
 public class PaginationStatementHandlerInterceptor implements Interceptor {
 
     private final static Logger logger = LoggerFactory.getLogger(PaginationStatementHandlerInterceptor.class);
 
     private static final ObjectFactory DEFAULT_OBJECT_FACTORY = new DefaultObjectFactory();
     private static final ObjectWrapperFactory DEFAULT_OBJECT_WRAPPER_FACTORY = new DefaultObjectWrapperFactory();
+    //mybatis 3.3版本 新增
+    private static final ReflectorFactory DEFAULT_RELECTOR_FACTORY = new DefaultReflectorFactory();
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
         StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
         ParameterHandler parameterHandler = statementHandler.getParameterHandler();
         BoundSql boundSql = statementHandler.getBoundSql();
-
-        MetaObject metaStatementHandler = MetaObject.forObject(statementHandler, DEFAULT_OBJECT_FACTORY, DEFAULT_OBJECT_WRAPPER_FACTORY);
+        //mybatis 3.3版本以下
+        //MetaObject metaStatementHandler = MetaObject.forObject(statementHandler, DEFAULT_OBJECT_FACTORY, DEFAULT_OBJECT_WRAPPER_FACTORY);
+        //mybatis 3.3版本 新增
+        MetaObject metaStatementHandler = MetaObject.forObject(statementHandler, DEFAULT_OBJECT_FACTORY, DEFAULT_OBJECT_WRAPPER_FACTORY,DEFAULT_RELECTOR_FACTORY);
         RowBounds rowBounds = (RowBounds) metaStatementHandler.getValue("delegate.rowBounds");
         // 没有分页参数
         if (rowBounds == null || rowBounds == RowBounds.DEFAULT) {
@@ -63,19 +79,19 @@ public class PaginationStatementHandlerInterceptor implements Interceptor {
         int offset = page.getOffset();
         int limit = page.getLimit();
         if(PageConstant.NOT_PAGING < offset && PageConstant.NOT_PAGING < limit ){
-        	String countSql = dialect.getCountString(originalSql);
-        	Connection connection = (Connection) invocation.getArgs()[0];
-        	int total = getTotal(parameterHandler, connection, countSql);
-        	page.setTotalCount(total);
-        	// 设置物理分页语句
-        	metaStatementHandler.setValue("delegate.boundSql.sql", dialect.getLimitString(originalSql, page.getOffset(), page.getLimit()));
+            String countSql = dialect.getCountString(originalSql);
+            Connection connection = (Connection) invocation.getArgs()[0];
+            int total = getTotal(parameterHandler, connection, countSql);
+            page.setTotalCount(total);
+            // 设置物理分页语句
+            metaStatementHandler.setValue("delegate.boundSql.sql", dialect.getLimitString(originalSql, page.getOffset(), page.getLimit()));
         }
-        	// 屏蔽mybatis原有分页
-        	metaStatementHandler.setValue("delegate.rowBounds.offset", RowBounds.NO_ROW_OFFSET);
-        	metaStatementHandler.setValue("delegate.rowBounds.limit", RowBounds.NO_ROW_LIMIT);
-        	if (logger.isDebugEnabled()) {
-        		logger.debug("分页SQL : " + boundSql.getSql());
-        	}
+            // 屏蔽mybatis原有分页
+            metaStatementHandler.setValue("delegate.rowBounds.offset", RowBounds.NO_ROW_OFFSET);
+            metaStatementHandler.setValue("delegate.rowBounds.limit", RowBounds.NO_ROW_LIMIT);
+            if (logger.isDebugEnabled()) {
+                logger.debug("分页SQL : " + boundSql.getSql());
+            }
         
 
         return invocation.proceed();
@@ -100,11 +116,6 @@ public class PaginationStatementHandlerInterceptor implements Interceptor {
      * @throws Exception
      */
     private int getTotal(ParameterHandler parameterHandler, Connection connection, String countSql) throws Exception {
-        // MetaObject metaStatementHandler =
-        // MetaObject.forObject(parameterHandler);
-        // Object parameterObject =
-        // metaStatementHandler.getValue("parameterObject");
-        // TODO 缓存具有相同SQL语句和参数的总数
         PreparedStatement prepareStatement = connection.prepareStatement(countSql);
         parameterHandler.setParameters(prepareStatement);
         ResultSet rs = prepareStatement.executeQuery();

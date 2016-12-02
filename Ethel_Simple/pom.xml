@@ -11,17 +11,6 @@
 	<name>Ethel_Simple</name>
 	<description>简单使用</description>
 
-	<properties>
-		<spring.version>4.2.5.RELEASE</spring.version>
-		<mybatis.version>3.2.7</mybatis.version>
-		<mybatis.spring.version>1.2.2</mybatis.spring.version>
-		<mysql.connector.version>5.1.30</mysql.connector.version>
-		<aspectj.version>1.8.9</aspectj.version>
-		<fastjson.version>1.2.8</fastjson.version>
-		<fasterxml.jackson.version>2.8.1</fasterxml.jackson.version>
-		<druid.version>1.0.21</druid.version>
-		<jstl.version>1.2</jstl.version>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -168,12 +157,6 @@
 		</dependency>
 
 		<!-- mybatis start -->
-		<dependency>
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis</artifactId>
-			<version>${mybatis.version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.mybatis</groupId>
 			<artifactId>mybatis-spring</artifactId>
