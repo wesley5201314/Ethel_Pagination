@@ -35,4 +35,10 @@ public class RestDataController {
 		RspPage<Property> pages = propertyService.queryList(pageIndex,pageSize);
 		return pages;
 	}
+	
+	@RequestMapping("/testAop")
+	public String testAop(){
+		propertyService.insert();
+		return "list";
+	}
 }

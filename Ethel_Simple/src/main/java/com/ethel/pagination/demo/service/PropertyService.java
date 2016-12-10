@@ -28,5 +28,12 @@ public class PropertyService {
 		rspPage.setTotalPages(page.getTotalPages());
 		return rspPage;
 	}
+	
+	public void insert(){
+		propertyMapper.deleteByPrimaryKey("9d637d82-1fe7-4047-bd81-8da134ab1057");
+		Property p = new Property();
+		p.setId("38abf125-71ac-416c-a6a7-34a4e049ccfc");
+		propertyMapper.insert(p);
+	}
 
 }
