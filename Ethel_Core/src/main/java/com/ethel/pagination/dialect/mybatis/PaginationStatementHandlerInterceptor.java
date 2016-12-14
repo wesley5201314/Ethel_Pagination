@@ -29,14 +29,6 @@ import com.ethel.pagination.dialect.Dialect;
 import com.ethel.pagination.dialect.DialectFactory;
 
 /**
- * 
- * <br>
- * 描述: 分页拦截器<br>
- * 公司: www.tydic.com<br>
- * @autho wesley
- * @time 2016年11月24日 上午11:22:24
- */
-/**
  * <br>
  * 标题: <br>
  * 描述: <br>
